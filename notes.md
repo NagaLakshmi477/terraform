@@ -340,8 +340,57 @@ here we have 2 types of provinsers
 creation time provisioners
 destory time provisioners
 
-provisioners will run during creation time. If yu want t run while destory we can use
+provisioners will run during creation time. If yu want to run while destory we can use
 when = destroy
 
 remote exec:
-means we need to connect to the server for this we need credinatilas. bacuse we cannot connect directly
+means we need to connect to the server for this we need credinatilas. bacuse we cannot connect directly.
+
+
+multiple-infra-using-terraform:
+===========================
+dev,prod,qa,sit,uat,pre-prod
+
+lakshmireddy.site
+
+roboshop-dev-mongodb
+roboshop-dev-redis
+roboshop-dev-mysql
+
+
+roboshop-UAT-mongodb
+roboshop-UAT-redis
+roboshop-UAT-mysql
+
+roboshop-PROD-mongodb
+roboshop-PROD-redis
+roboshop-PROD-mysql
+sites:
+mongodb-dev.lakshmireddy.site
+
+pros:
+====
+no need to duplicate the code
+consitency
+
+cons:
+====
+should be very cautious change done in DEV may go to prod alos by mistake
+bash:
+terraform init -backend-config=dev/backend.tf
+terraform plan -var-file=dev/dev.tfvars
+terraform apply -var-file=dev/dev.tfvars
+
+If you want to change the environment 
+terraform init -reconfigure -backend-config=prod/backend.tf
+terraform plan -var-file=prod/prod.tfvars
+terraform apply -var-file=prod/prod.tfvars
+
+pros:
+====
+no need to duplicate the code
+consitency
+
+cons:
+====
+should be very cautious change done in DEV may go to prod aśḍlos by mistake
