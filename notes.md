@@ -350,15 +350,3 @@ means we need to connect to the server for this we need credinatilas. bacuse we 
 
 
 
-workspace:
-========
-workspace means multiple environements
-creating workspace:
-terraform workspace new dev
-select workspace:
-terraform workspace select dev
-terraform.workspace=dev/prod
-lookup(map,key) ---> dev
-lookup(map,qa,"t3.micro") 
-
-terraform workspace select prod
