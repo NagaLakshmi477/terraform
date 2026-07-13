@@ -1,17 +1,22 @@
-Ansible architecture
-configuration management
-variables ---> prefernces
-conditions
-loops
-functions or filters
-data types
-developed playbooks
-roles
-Tags, Dynamic inventory, vault, using ssm parameter store, handlers, include import role ...
+# Ansible
 
+* Ansible architecture
+* configuration management
+* variables ---> prefernces
+* conditions
+* loops
+* functions or filters
+* data types
+* developed playbooks
+* roles
+* Tags, Dynamic inventory, vault, using ssm parameter store, handlers, include import role ...
 
-ansible server ----> modules/collections -----> remote host
-ansible is devloped using pyhon
+# Ansible Basics
+
+Ansible server ----> modules/collections -----> remote host
+
+Ansible is developed using Python
+
 
 roboshop create user  ----> node js
 frontend -----> html,css,js ----> name,email,password
@@ -24,39 +29,102 @@ adduser(name,email,password){
 }
 
 
-roboshop create user using ansible:
-------------------------------------
-custom module
-library ----> roles can also include custom modules
-write python code
+# Ansible - Roboshop Example & Concepts
+
+## Custom Module (Roboshop - Create User)
+
+* Custom modules can be created using **Python**
+* Stored inside:
+
+  * `library/` directory
+  * Can also be included inside **roles**
+
+### Example Module:
+
+```
 myroboshop.createuser
     name:
     email:
     password:
-ansible executes modules/collectiions are in remote server
+```
 
-plugins: lookup('amazon.aws_ssm','name','region:'') ----> ansible server
-plugins add extra functionlity to the ansible server like lookup,inventory, filter.....
+* Ansible executes **modules/collections on remote servers**
 
+---
+
+## Plugins in Ansible
+
+* Plugins add extra functionality to the **Ansible server (control node)**
+* Types include:
+
+  * lookup
+  * inventory
+  * filter
+
+### Example:
+
+```
+lookup('amazon.aws_ssm', 'name', 'region:')
+```
+
+---
+
+## Roboshop Example - Add to Cart
+
+### Module:
+
+```
 myroboshop.addcart
     product_name:
     product_id:
-you want to check the prize before adding to the cart
-lookup('roboshop.checkproduct','product_id:'123')
+```
+
+### Condition Check Before Adding:
+
+* Check product price before adding to cart:
+
+```
+lookup('roboshop.checkproduct', 'product_id:123')
+```
+
+---
+
+## Limitations of Ansible (State Management)
+
+* Ansible is **poor in state management**
+* Example:
+
+  * If someone manually modifies infrastructure in console
+  * Ansible **cannot detect drift**
+  * Running again may create **duplicate resources**
+
+---
+
+## Where Ansible Excels
+
+* Best suited for:
+
+  * Configuration management
+  * Managing software inside servers
+  * Automating setup and deployments
+
+* Not ideal for:
+
+  * Infrastructure state tracking (compared to Terraform)
+
+---
 
 
-ansible is very poor in state mangement
-ex: if someone edits the infra m,anullay in console ansible cannotdetect it may create duplictae resources if you run again
+# Manually Created Infrastructure - Challenges
 
-ansible is perfect for doing configurations within the server
+## Issues
 
-manually created infra:
-===========================
-time
-errors
-if something goes wrong tracking is very diffcult
-restoring infra is time taking
-version control
+* Time consuming
+* Prone to errors
+* Difficult to track issues if something goes wrong
+* Restoring infrastructure takes a lot of time
+* No proper version control
+
 
 ##  Benefits of Infrastructure as Code (IaC)
 
