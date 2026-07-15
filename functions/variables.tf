@@ -17,7 +17,7 @@ variable "ec2_tags" {
 }
 
 variable "sg_name" {
-    default = "allow-all"
+    default = "allow-all-traffic"
 }
 
 variable "sg_description" {
@@ -53,11 +53,11 @@ variable "instances" {
 }
 
 variable "zone_id" {
-    default = "Z032558618100M4EJX8X4"
+    default = "Z04885203IJ90T38NSVJA"
 }
 
 variable "domain_name" {
-    default = "daws84s.site"
+    default = "nagalakshmi.site"
 }
 
 variable "common_tags"{
