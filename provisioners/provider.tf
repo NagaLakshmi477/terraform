@@ -7,7 +7,7 @@ terraform {
   }
 
   backend "s3" {
-    bucket = "84s-remote-state"
+    bucket = "latest-lakshmi-remote-state-dev"
     key    = "provisioners"
     region = "us-east-1"
     encrypt        = true
