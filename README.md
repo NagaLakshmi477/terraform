@@ -260,9 +260,8 @@ Use based on data structure:
   "Security group name is ${var.sg_name}"
   ```
 
-- Use **dynamic block** for complex nested structures.
-Dynamic block:
-=================
+# dynamic block
+- It is used for complex nested structures.
 ex: we have ingress and outgress that is not key values we need to change port number(22,.....)
 for this we will use dyanamic loops
 
@@ -278,10 +277,9 @@ dynamic "setting" {
   }
 }
 
-functions:
-============
-we cannot define our own functions in terraform 
-we need to use builtin functions
+# functions:
+- we cannot define our own functions in terraform 
+- we need to use builtin functions
 
 common tags:
 version =1.0
@@ -308,75 +306,157 @@ outputs -----> print the info after creating the resources
 
 it can query the info from the provider
 
-locals:
-============
-locals can have expressions,you can assign a name to it and use it wherever you require
+# Locals
 
-local are like variables holding the values agianst keys,
-but you can refer variables inside locals,expressions,functions....
+* Locals can have expressions; you can assign a name to them and use them wherever required.
+* Locals are reusable values inside the Terraform code.
+* Locals are like variables that hold values against keys.
+* You can refer to variables, expressions, and functions inside locals.
 
-can we override the values that given in variables?
-no we can't
-variables override: we can mention in variables that want to override
-locals override: we can mention those variables that no need to override
+Can we override the values given in variables?
 
-variables can be overriden, locals cannot be ovveriden
+* Yes, variables can be overridden.
 
-state:
-=======
-Iaac: Declarative way of creating infra, whatever we declare Iaac tool should follow the
- sysntax
+Variables override:
 
-on which files are declaring 
-.tf files ---> it contain desired or declarative  infra ----> expetation
-what exsits in aws ---> actual infra ----> reality
-state files ---> terraform use this file to track what is created in provider
+* We can override variables using tfvars files, CLI arguments, or default values.
 
-terraform plan
-=============
-reads .tf ---> understand what user wants
-read state file ---> empty ---> it is not created and also
-query the provider ---> to check alreday infra exsits or not
+Locals override:
 
-it starts create
-terraform apply:
+* Locals cannot be overridden; they are fixed once defined.
 
-created infra
-terraform plan:
-reads .tf files,state file ----> matched
+Final point:
 
-i deleted instance	in console manullay
-reads .tf files,state file ----> not matched
-check provider to verify desired infra vs actual infra
+* Variables can be overridden, locals cannot be overridden.
 
 
-when you change tf files
-=======================
-.tf ---> understand what user wants
-state file ---> not matched
+# State
 
-actual infra ----> user don't want route r53 records
+Infrastructure as Code (IaC):
 
-terraform uses state files to track what is created in the provider every time.
-we run terraform commands terraform check whether the desired infra is matched or not with actula infra thourht the stae file
+* A declarative way of creating infrastructure, where we define the desired state and the IaC tool follows the syntax to provision it.
 
-we cannot put .state files in local for this we user s3 buckets
+Where do we declare infrastructure?
 
-s3bucket: (state.tf)
-=================
-keeping state file in local will not work in collabarative environment.
-terraform doesn't understand what are the resources created by others
-so it may create duplicate resources or else it will give erros
+* `.tf` files → contain the desired (declarative) infrastructure → expectation
+
+What exists in AWS?
+
+* Actual infrastructure → reality
+
+State files:
+
+* Terraform uses state files to track what resources are created in the provider (e.g., AWS).
+* It helps Terraform compare desired state (code) with actual state (real infrastructure).
+
+# Terraform Plan & Apply
+
+## Terraform Plan
+
+* Reads `.tf` files → understands what the user wants (desired state).
+* Reads the state file → checks what is already created.
+* Queries the provider (e.g., AWS) → verifies if infrastructure already exists.
+* Compares desired state vs actual state and shows what will be created/changed.
+
+## Terraform Apply
+
+* Executes the changes from the plan.
+* Creates/updates infrastructure in the provider.
+* Updates the state file after successful creation.
+
+## Scenario
+
+Initial run:
+
+* State file is empty → nothing is created yet.
+* Terraform plans to create resources.
+
+After apply:
+
+* Infrastructure is created.
+* State file and `.tf` files are in sync (matched).
+
+Manual change (e.g., instance deleted in console):
+
+* `.tf` files and state file → still show resource exists.
+* Actual infrastructure → resource is missing.
+* Terraform detects mismatch by checking provider.
+* Plan shows changes needed to fix drift (recreate resource).
 
 
-DynamoDB:
-===========
-- we need to create table in dynamo db
-DynamoDB ---> tables ---> create table ----> name ----> partition key (LockID) --> create
-for locking purpose we will use dyanamo db
-- to see the state file
-DynamoDB ---> tables ---> created table ----> expore items ---> it conatin state file
-same state file is available under s3 bucket
+
+# When You Change .tf Files
+
+* `.tf` files → Terraform understands what the user now wants (new desired state).
+* State file → does not match the updated `.tf` configuration.
+
+Example:
+
+* Actual infrastructure → user no longer wants Route53 records.
+
+What Terraform does:
+
+* Terraform uses the state file to track what is created in the provider.
+
+* When you run Terraform commands, it compares:
+
+  * Desired state (`.tf` files)
+  * Current state (state file)
+  * Actual infrastructure (provider, e.g., AWS)
+
+* If there is a mismatch, Terraform plans changes to make actual infrastructure match the desired state.
+
+State file storage:
+
+* We should not keep `.tfstate` files locally (not recommended for teams).
+* Instead, we store state files remotely using S3 buckets (remote backend).
+
+
+
+# S3 Bucket (Remote State)
+
+* Keeping the state file locally will not work in a collaborative environment.
+* Terraform will not understand what resources are created by other team members.
+* This can lead to:
+
+  * Duplicate resource creation
+  * Errors or conflicts during deployment
+
+Solution:
+
+* Store the Terraform state file in a remote backend like an S3 bucket.
+* This allows all team members to share the same state and work consistently.
+
+
+
+# DynamoDB (State Locking)
+
+* We need to create a table in DynamoDB.
+* Go to: DynamoDB → Tables → Create Table →
+
+  * Table name: (any name)
+  * Partition key: `LockID` → Create
+
+Purpose:
+
+* DynamoDB is used for **state locking** in Terraform.
+* It prevents multiple users from making changes at the same time.
+
+How it works:
+
+* When Terraform runs, it creates a lock entry in the DynamoDB table.
+* Other users cannot run Terraform until the lock is released.
+
+Note:
+
+* The actual state file is stored in the S3 bucket.
+* DynamoDB does NOT store the full state file — it only stores lock information.
+
+Correction:
+
+* DynamoDB table does NOT contain the state file.
+* The state file is only available in the S3 bucket.
+
 
 native locking:
 -------------
@@ -387,32 +467,60 @@ Previously we used dynamodb in my project but recently we migrated into s3 nativ
 
 
 
-provisioners:
-===========
-when you create the server using terraform. we can take some actions using provisioners
-1.local-exec
-2.remote-exec
+# Provisioners
 
-where i am running terraform command that is local to terraform (laptop)
-remote means server i created using terraform
+* Provisioners are used to perform actions after creating a resource using Terraform (e.g., a server).
 
-After creating server if i do any actions in local that is local-exec
-After creating server if i do any actions in remote that is remote-exec
+Types of provisioners:
 
-failure behaviour:
-------------------------
-if we get any error it agian create from the scratch so we don't want to stop we will face any error then we can use
-on_failure = continue means it will not recreate
+1. **local-exec**
+2. **remote-exec**
 
-here we have 2 types of provinsers
-creation time provisioners
-destory time provisioners
+Explanation:
 
-provisioners will run during creation time. If yu want to run while destory we can use
-when = destroy
+* The machine where you run Terraform (your laptop) is called **local**.
+* The server created by Terraform is called **remote**.
 
-remote exec:
-means we need to connect to the server for this we need credinatilas. bacuse we cannot connect directly.
+local-exec:
+
+* Executes commands on the **local machine (your laptop)** after the resource is created.
+
+remote-exec:
+
+* Executes commands on the **remote server (created by Terraform)** after the resource is created.
+
+
+# Provisioners – Failure Behaviour & Types
+
+## Failure Behaviour
+
+* If we get any error in a provisioner, Terraform will **recreate the resource from scratch** in the next run.
+* If we do not want this behavior, we can use:
+
+  * `on_failure = continue`
+* This means Terraform will **ignore the error and will not recreate the resource**
+
+---
+
+## Types of Provisioners
+
+1. **Creation-time provisioners**
+
+   * Run during resource creation (default behavior)
+
+2. **Destroy-time provisioners**
+
+   * Run during resource destruction
+   * Use: `when = destroy`
+
+---
+
+## Remote-exec
+
+* `remote-exec` means executing commands on the **remote server** created by Terraform
+* To connect to the server, we need **credentials** (SSH key, username, or password)
+* We cannot connect directly without proper authentication
+
 
 
 
